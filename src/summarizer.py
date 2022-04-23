@@ -2,69 +2,85 @@ import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 import operator
+import sys
 nlp = spacy.load("en_core_web_sm")
 # extractive summary by word count
 #text = """This is an example text. We will use seven sentences and we will return 3. This blog is written by Yujian Tang. Yujian is the best software content creator. This is a software content blog focused on Python, your software career, and Machine Learning. Yujian's favorite ML subcategory is Natural Language Processing. This is the end of our example."""
-n = 3;
-text = """Russia has for the first time admitted losses of personnel on the Moskva, the flagship of its Black Sea Fleet, which sank last week.
+# n = 3;
+# text = """Russia has for the first time admitted losses of personnel on the Moskva, the flagship of its Black Sea Fleet, which sank last week.
 
-The defence ministry said one crew member had died and 27 were missing after the sinking, while the remaining 396 had been rescued. Previously it had made no mention of casualties.
+# The defence ministry said one crew member had died and 27 were missing after the sinking, while the remaining 396 had been rescued. Previously it had made no mention of casualties.
 
-The BBC cannot independently verify these figures.
+# The BBC cannot independently verify these figures.
 
-The sinking of the missile cruiser is one of the defining events of the war in Ukraine so far. Russia says the ship went down because of a fire on board, but Ukraine says it sank it with missiles.
+# The sinking of the missile cruiser is one of the defining events of the war in Ukraine so far. Russia says the ship went down because of a fire on board, but Ukraine says it sank it with missiles.
 
-And now, the wreckage of the pride of Russia's fleet has been declared an item of Ukrainian underwater cultural heritage, under the category of rare scientific or technical equipment.
+# And now, the wreckage of the pride of Russia's fleet has been declared an item of Ukrainian underwater cultural heritage, under the category of rare scientific or technical equipment.
 
-As the BBC's Joe Inwood reports, Ukraine's Ministry of Defence says the wreck can be admired "without much diving"."""
+# As the BBC's Joe Inwood reports, Ukraine's Ministry of Defence says the wreck can be admired "without much diving"."""
 
 def summarize(text, n):
-    # tokenize
-    doc = nlp(text)
-    
-    # create dictionary
-    word_scores = {}
+	# tokenize
+	doc = nlp(text)
 
-    # Add all words, that aren't stop words or punctuation to the word_scores object 
-    for word in doc:
-        word_scores[word.text.lower()] = 0
+	# create dictionary
+	word_scores = {}
 
-
-    # loop through every sentence and give it a weight
-    for word in doc:
-        word = word.text.lower()
-        if word in word_scores and word not in STOP_WORDS and word not in punctuation and "\n" not in word:
-            word_scores[word] += 1
-
-    # create a list of tuple (sentence text, score, index)
-    sents = []
-    # score sentences
-    sent_score = 0
-    #print(word_scores)
-    for index, sent in enumerate(doc.sents):
-        for word in sent:
-            sent_score += word_scores[word.text.lower()]
-            #print(word_scores[word.text.lower()])
-        sents.append((sent.text.replace("\n", " "), sent_score / (len(sent) / 2), index))
-        #print(sent.text.replace("\n", " "), sent_score ,len(sent), sent_score / (len(sent) / 2))
-        sent_score = 0;
+	# Add all words, that aren't stop words or punctuation to the word_scores object 
+	for word in doc:
+		word_scores[word.text.lower()] = 0
 
 
-    # sort the sentences by word occurance(tuple index 1)
-    #print("----- \n", sents)
-    sents.sort(key=operator.itemgetter(1))
-    #print("----- \n", sents)
-    # return best rated n amount of sentences
-    bestSents = sents[-n:]
-    # keep the sentence order as in original text
-    bestSents.sort(key=operator.itemgetter(2))
+	# loop through every sentence and give it a weight
+	for word in doc:
+		word = word.text.lower()
+		if word in word_scores and word not in STOP_WORDS and word not in punctuation and "\n" not in word:
+			word_scores[word] += 1
 
-    # compile them into text
-    summary_text = ""
-    for sent in bestSents:
-        summary_text += sent[0] + " "
-        #print(sent[1])
-    
-    print(summary_text)
+	# create a list of tuple (sentence text, score, index)
+	sents = []
+	# score sentences
+	sent_score = 0
+	#print(word_scores)
+	for index, sent in enumerate(doc.sents):
+		for word in sent:
+			sent_score += word_scores[word.text.lower()]
+			#print(word_scores[word.text.lower()])
+		sents.append((sent.text.replace("\n", " "), sent_score / (len(sent) / 2), index))
+		#print(sent.text.replace("\n", " "), sent_score ,len(sent), sent_score / (len(sent) / 2))
+		sent_score = 0;
 
-summarize(text, n)
+
+	# sort the sentences by word occurance(tuple index 1)
+	#print("----- \n", sents)
+	sents.sort(key=operator.itemgetter(1))
+	#print("----- \n", sents)
+	# return best rated n amount of sentences
+	bestSents = sents[-n:]
+	# keep the sentence order as in original text
+	bestSents.sort(key=operator.itemgetter(2))
+
+	# compile them into text
+	summary_text = ""
+	for sent in bestSents:
+		summary_text += sent[0] + " "
+		#print(sent[1])
+	print(summary_text)
+
+
+# Read from cmd args
+if (len(sys.argv) == 4):
+	print(sys.argv[1])
+	print(sys.argv[2])
+	print(sys.argv[3])
+	if sys.argv[1] == '0':
+		#Input from file
+		f = open(sys.argv[2], "r")
+		text = f.read()
+		n = int(sys.argv[3])
+		summarize(text, n)
+	if sys.argv[1] == '1':
+		#Input from arg
+		print(sys.argv[2])
+else:
+	print("Please use the correct argument formatting.")
