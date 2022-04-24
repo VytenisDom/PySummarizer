@@ -37,21 +37,23 @@ def summarize(text, output, n):
 	# Sort the sentences by sentence score (tuple index 1)
 	sents.sort(key=operator.itemgetter(1))
 
-	# Check if n is percentage
+	# If n is a percentage, calculate it and cast to int
 	if n < 1:
 		n = int(round(n * sent_length))
-
+	else:
+		n = int(n)
 	# Take best rated n amount of sentences
 	bestSents = sents[-n:]
 	# Sort again to keep the sentence order as in original text
 	bestSents.sort(key=operator.itemgetter(2))
 
-	# compile them into text
+	# Compile into text
 	summary_text = ""
 	for sent in bestSents:
 		summary_text += sent[0] + " "
 
 	if output == 0:
+		print("Writing to file output.txt")
 		f = open("output.txt", "w")
 		f.write(summary_text)
 		f.close()
@@ -66,21 +68,53 @@ def summarize(text, output, n):
 
 # Read from cmd args
 if (len(sys.argv) == 5):
-	print(sys.argv[1]) # input
-	print(sys.argv[2]) # output
-	print(sys.argv[3]) # input (file or text)
-	print(sys.argv[4]) # n
-	if sys.argv[1] == '0':
-		#Input from file
-		f = open(sys.argv[3], "r")
-		text = f.read()
-		f.close()
-	if sys.argv[1] == '1':
-		#Input from arg
-		text = sys.argv[3]
+	# print(sys.argv[1]) # inputMode
+	# print(sys.argv[2]) # outputMode
+	# print(sys.argv[3]) # input (file or text)
+	# print(sys.argv[4]) # n
 
-	output = int(sys.argv[2])
-	n = float(sys.argv[4])
-	summarize(text, output, n)
+	errors_present = False
+
+	# Handling errors on inputMode parameter
+	if sys.argv[1] == '0':
+		# Input from file
+		text = ""
+		# Handling errors on input parameter
+		try:
+			f = open(sys.argv[3], "r")
+			print("Reading from file", sys.argv[3])
+			text = f.read()
+			f.close()
+		except IOError:
+			print("File does not exist.")
+			errors_present = True
+	elif sys.argv[1] == '1':
+		# Input from arg
+		text = sys.argv[3]
+	else:
+		print("Input parameter formatting is not correct.")
+		errors_present = True
+
+	# Handling errors on outputMode parameter
+	if sys.argv[2] != "0" and sys.argv[2] != "1":
+		print("Output parameter formatting is not correct.")
+		errors_present = True
+	else:
+		output = int(sys.argv[2])
+
+	# Handling errors on n parameter
+	try: 
+		n = float(sys.argv[4])
+		if (n < 0):
+			print("N parameter must be a positive integer or a fraction.")
+			errors_present = True
+	except:
+		print("N parameter must be a number")
+		errors_present = True
+	
+
+	# If no errors are present - start the summarization with given parameters
+	if not errors_present:
+		summarize(text, output, n)
 else:
-	print("Please use the correct argument formatting.")
+	print("Please use correct argument formatting.")
