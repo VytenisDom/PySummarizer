@@ -1,8 +1,8 @@
+import operator
+import sys
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
-import operator
-import sys
 nlp = spacy.load("en_core_web_sm")
 
 def summarize(text, output, n):
@@ -68,10 +68,10 @@ def summarize(text, output, n):
 
 # Read from cmd args
 if (len(sys.argv) == 5):
-	# print(sys.argv[1]) # inputMode
-	# print(sys.argv[2]) # outputMode
-	# print(sys.argv[3]) # input (file or text)
-	# print(sys.argv[4]) # n
+	# sys.argv[1] - inputMode
+	# sys.argv[2] - outputMode
+	# sys.argv[3] - input (file or text)
+	# sys.argv[4] - n
 
 	errors_present = False
 
