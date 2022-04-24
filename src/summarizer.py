@@ -19,7 +19,7 @@ nlp = spacy.load("en_core_web_sm")
 
 # As the BBC's Joe Inwood reports, Ukraine's Ministry of Defence says the wreck can be admired "without much diving"."""
 
-def summarize(text, n):
+def summarize(text, output, n):
 	# tokenize
 	doc = nlp(text)
 
@@ -65,22 +65,37 @@ def summarize(text, n):
 	for sent in bestSents:
 		summary_text += sent[0] + " "
 		#print(sent[1])
-	print(summary_text)
+
+	if output == 0:
+		f = open("output.txt", "w")
+		f.write(summary_text)
+		f.close()
+		print("Done.")
+	elif output == 1:
+		print(summary_text)
+
+	print("Length of original text   : ", len(text))
+	print("Length of summarized text : ", len(summary_text))
+	print("Summarized % of text      : ", round(((len(text) - len(summary_text)) / len(text)) * 100, 2), "%")
 
 
 # Read from cmd args
-if (len(sys.argv) == 4):
-	print(sys.argv[1])
-	print(sys.argv[2])
-	print(sys.argv[3])
+if (len(sys.argv) == 5):
+	print(sys.argv[1]) # input
+	print(sys.argv[2]) # output
+	print(sys.argv[3]) # input (file or text)
+	print(sys.argv[4]) # n
 	if sys.argv[1] == '0':
 		#Input from file
-		f = open(sys.argv[2], "r")
+		f = open(sys.argv[3], "r")
 		text = f.read()
-		n = int(sys.argv[3])
-		summarize(text, n)
+		f.close()
 	if sys.argv[1] == '1':
 		#Input from arg
-		print(sys.argv[2])
+		text = sys.argv[3]
+
+	output = int(sys.argv[2])
+	n = int(sys.argv[4])
+	summarize(text, output, n)
 else:
 	print("Please use the correct argument formatting.")
